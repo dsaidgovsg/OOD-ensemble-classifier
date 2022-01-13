@@ -12,8 +12,7 @@ from scipy import misc
 import pickle
 
 def cal_in_cls(fold, nclasses, nnName):
-    #nsplit = 5
-    nsplit = 4
+    nsplit = 5
     In_classes = []
     np.random.seed(3)
     p1 = np.random.permutation(nclasses).tolist()
@@ -31,7 +30,7 @@ def testData(net1, criterion, testloaderIn, testloaderOut, in_dataset, out_datas
 
     norm = [63.0/255.0, 62.1/255.0, 66.7/255.0]
     #nclasses = int(in_dataset[5:])
-    nclasses = 8
+    nclasses = 10
     nsplit = int(nclasses*0.8)
 
     N = len(testloaderIn)
@@ -45,7 +44,7 @@ def testData(net1, criterion, testloaderIn, testloaderOut, in_dataset, out_datas
 ########################################In-distribution###########################################
     for j, data in enumerate(testloaderIn):
         images, _ = data
-        
+
         inputs = images.cuda().requires_grad_()
         outputs = net1(inputs)
         # print (inputs, outputs)
@@ -100,7 +99,6 @@ def testData(net1, criterion, testloaderIn, testloaderOut, in_dataset, out_datas
 ###################################Out-of-Distributions#####################################
     for j, data in enumerate(testloaderOut):
         images, _ = data
-    
     
         inputs = images.cuda().requires_grad_()
         outputs = net1(inputs)

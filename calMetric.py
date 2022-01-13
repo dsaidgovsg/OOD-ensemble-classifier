@@ -16,12 +16,12 @@ def test(indata, outdata, plot=False):
     #other = np.zeros(5312)
     #other = np.zeros(3861)
     other = np.zeros(10000)
-    cifar = np.zeros(400)
+    cifar = np.zeros(200)
     np.random.seed(3)
     p1 = np.random.permutation(10000)
     #p2 = np.random.permutation(5312) #3861 or 5312
     #for fold in range(1, 6):
-    for fold in range(1,5):
+    for fold in range(1,6):
         #data = pickle.load(open(f"./results/{indata}_{outdata}_{fold}.p", "rb" ))
         data = pickle.load(open(f"./results/{indata}_{outdata}_{fold}.p", "rb"))
         cnt = 0
@@ -84,6 +84,8 @@ def test(indata, outdata, plot=False):
             name = 'LSUNr'
         elif outdata == 'Preliminary':
             name = 'PreliminaryImage'
+        elif outdata == 'pidood':
+            name = 'pidood'
         plt.figure(figsize=(3,3))
         sns.distplot(cifar, kde=False, rug=False,label="CIFAR-100")
         sns.distplot(other, kde=False, rug=False,label=name)

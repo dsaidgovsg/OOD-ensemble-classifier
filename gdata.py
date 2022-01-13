@@ -24,7 +24,7 @@ transform = transforms.Compose([
 class PreliminaryImageDataset(Dataset):
     def __init__(self, transform = None):
         self.samples = []
-        root = "/Preliminary_Image_Dataset"
+        root = "./Preliminary_Image_Dataset"
         onlyfiles = [f for f in os.listdir(root)]  # Get names of only the files, ignoring DS_Store and README
         onlyfiles.remove(".DS_Store")
         onlyfiles.remove("README.txt")
@@ -33,16 +33,17 @@ class PreliminaryImageDataset(Dataset):
             for j, images in enumerate(os.listdir(classes)):
                 img = np.array(Image.open(os.path.join(classes, images)))
                 self.samples.append([img, i])
+            print(i, classes)
         self.samples = np.array(self.samples, dtype='object')
         np.random.seed(3)
         p = np.random.permutation(len(self.samples))  # Designate 800 images to be test data, 400 of which is val
         self.transformations = transform
-        self.test_data = self.samples[p[:800]][:, 0]
-        self.test_labels = self.samples[p[:800]][:, 1]
+        self.test_data = self.samples[p[:1000]][:, 0]
+        self.test_labels = self.samples[p[:1000]][:, 1]
         np.random.seed(3)
         p1 = np.random.permutation(len(self.test_data))
-        self.test_data = self.test_data[p1[400:]]
-        self.test_labels = [self.test_labels[i] for i in p1.tolist()[400:]]
+        self.test_data = self.test_data[p1[800:]]
+        self.test_labels = [self.test_labels[i] for i in p1.tolist()[800:]]
 
     def __getitem__(self, index):
         img, label = self.test_data[index], self.test_labels[index]

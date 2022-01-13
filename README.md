@@ -1,9 +1,6 @@
 # Ensemble of Self Supervised Leave-out Classifiers
 This is an unofficial pytorch implementation of [Out-of-Distribution Detection Using an Ensemble of Self Supervised Leave-out Classifiers](http://openaccess.thecvf.com/content_ECCV_2018/papers/Apoorv_Vyas_Out-of-Distribution_Detection_Using_ECCV_2018_paper.pdf). 
 
-Model retraining is done using retrain.py and eloc_solver_retrain.py
-Currently some functions in cal.py, test.py, train.py, retrain.py need to be refactored to adjust the number of splits.
-
 ## Requirements
 - Python 3.7+
 - PyTorch 0.4.1

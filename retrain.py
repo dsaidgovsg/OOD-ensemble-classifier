@@ -7,7 +7,7 @@ from torchvision import datasets
 #from eloc_solver import Solver
 from eloc_solver_retrain import Solver
 from utils import savefig, CIFAR10Mix, CIFAR100Mix
-from utils.loader import PIDtrain
+from utils.loader import PIDtrain, PIDonly
 import models
 import numpy as np
 # Training settings
@@ -20,7 +20,7 @@ parser.add_argument('--epochs', type=int, default=50, metavar='N',
                     help='number of epochs to train (default: 100)')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
-parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
+parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                     help='learning rate (default: 0.1)')
 parser.add_argument('--gamma', type=float, default=0.1, help='LR is multiplied by gamma on schedule.')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
@@ -130,9 +130,10 @@ class MySolver(Solver):
 
         elif args.in_dataset == 'pid':
             args.num_classes = 10
-            root = "/Preliminary_Image_Dataset"
+            root = "./Preliminary_Image_Dataset"
             id_train_dataset = PIDtrain(root, './data/iSUN', train=True, transform=transforms.Compose([
-                transforms.RandomCrop(32, padding=4),
+                #transforms.RandomCrop(32, padding=4),
+                transforms.Resize(32),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
@@ -140,7 +141,8 @@ class MySolver(Solver):
             ]))
 
             ood_train_dataset = PIDtrain(root, './data/iSUN', train=True, transform=transforms.Compose([
-                transforms.RandomCrop(32, padding=4),
+                #transforms.RandomCrop(32, padding=4),
+                transforms.Resize(32),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
@@ -148,7 +150,8 @@ class MySolver(Solver):
             ]))
 
             val_dataset = PIDtrain(root, './data/iSUN', train=False, val=True, transform=transforms.Compose([
-                transforms.RandomCrop(32, padding=4),
+                #transforms.RandomCrop(32, padding=4),
+                transforms.Resize(32),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
@@ -218,19 +221,24 @@ if __name__ == '__main__':
     for param in solver.model.parameters():
         param.requires_grad = False
     # First experiment: unfrozen last linear layer
-    # solver.model.fc = torch.nn.Linear(342,8)
+    solver.model.fc = torch.nn.Linear(342,8)
     # Second experiment: unfrozen last layer + last 2 layers of denseblock
+    # for param in solver.model.block3.layer[14].parameters():
+    #    param.requires_grad = True
+    # for param in solver.model.block3.layer[15].parameters():
+    #    param.requires_grad = True
+    # solver.model.fc = torch.nn.Linear(342, 8)
 
-    for param in solver.model.block3.layer[15].parameters():
-        param.requires_grad = True
-    for param in solver.model.block3.layer[15].parameters():
-        param.requires_grad = True
-    solver.model.fc = torch.nn.Linear(342, 8)
-    print(solver.model.fc)
-    #solver.model.cuda()
+    # Third exp: freeze last 5 layers
+    #for i in range(10,16):
+    #    for param in solver.model.block3.layer[i].parameters():
+    #        param.requires_grad = True
+    #solver.model.fc = torch.nn.Linear(342, 8)
+    #
+    solver.model.cuda()
     #
 
-    """
+
     for epoch in range(args.start_epoch, args.epochs):
         solver.adjust_learning_rate(epoch)
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, args.epochs, solver.args.lr))
@@ -247,4 +255,3 @@ if __name__ == '__main__':
 
     print('Best acc:')
     print(solver.best_prec1)
-    """
