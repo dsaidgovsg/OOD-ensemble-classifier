@@ -38,12 +38,12 @@ class PreliminaryImageDataset(Dataset):
         np.random.seed(3)
         p = np.random.permutation(len(self.samples))  # Designate 800 images to be test data, 400 of which is val
         self.transformations = transform
-        self.test_data = self.samples[p[:1000]][:, 0]
-        self.test_labels = self.samples[p[:1000]][:, 1]
+        self.test_data = self.samples[p[:800]][:, 0]
+        self.test_labels = self.samples[p[:800]][:, 1]
         np.random.seed(3)
         p1 = np.random.permutation(len(self.test_data))
-        self.test_data = self.test_data[p1[800:]]
-        self.test_labels = [self.test_labels[i] for i in p1.tolist()[800:]]
+        self.test_data = self.test_data[p1[400:]]
+        self.test_labels = [self.test_labels[i] for i in p1.tolist()[400:]]
 
     def __getitem__(self, index):
         img, label = self.test_data[index], self.test_labels[index]
@@ -147,3 +147,42 @@ data = pd.read_pickle(f"./results/pid_Imagenet_1.p")
 print(len(data['out_sfx']))
 print(len(data['out_pro']))
 """
+class external(Dataset):
+    def __init__(self, root, distribution=None, transform=None, target_transform=None):
+        self.samples = []
+        self.distribution = distribution
+        self.transformations = transform
+        onlyfiles = [f for f in os.listdir(root)]  # Get names of only the files, ignoring DS_Store and README
+        onlyfiles.remove("README.txt")
+        for i, classes in enumerate(onlyfiles):
+            classes = os.path.join(root, classes)
+            for j, images in enumerate(os.listdir(classes)):
+                img = Image.open(os.path.join(classes, images))
+                if img.mode != 'RGB':
+                    img = img.convert('RGB')            # Images scraped online can be in  different format
+                img = np.array(img)
+                self.samples.append([img, i])
+            print(i, classes)
+        self.samples = np.array(self.samples, dtype='object')
+        self.test_data = self.samples[:,0]
+        self.test_labels = self.samples[:,1]
+
+    def __getitem__(self, index):
+        if self.distribution == 'in':
+            img, label = self.test_data[index], self.test_labels[index]
+        else:
+            img, label = self.test_data[index], -1
+        img = Image.fromarray(img)
+        if self.transformations is not None:
+            img = self.transformations(img)
+
+        # plt.imshow(  img.permute(1, 2, 0)  )
+        # plt.show()
+
+        return img, label
+
+    def __len__(self):
+        return len(self.test_data)
+
+#root = './data/External-OUT'            # 964 in, 900 out
+#print(len(external(root,distribution='in')))
