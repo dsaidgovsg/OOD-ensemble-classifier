@@ -129,11 +129,11 @@ class MySolver(Solver):
                                       ]))
 
         elif args.in_dataset == 'pid':
-            args.num_classes = 10
+            args.num_classes = 11
             root = "./Preliminary_Image_Dataset"
             id_train_dataset = PIDtrain(root, './data/iSUN', train=True, transform=transforms.Compose([
                 #transforms.RandomCrop(32, padding=4),
-                transforms.Resize(32),
+                transforms.Resize((32,32)),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
@@ -142,7 +142,7 @@ class MySolver(Solver):
 
             ood_train_dataset = PIDtrain(root, './data/iSUN', train=True, transform=transforms.Compose([
                 #transforms.RandomCrop(32, padding=4),
-                transforms.Resize(32),
+                transforms.Resize((32,32)),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
@@ -150,13 +150,12 @@ class MySolver(Solver):
             ]))
 
             val_dataset = PIDtrain(root, './data/iSUN', train=False, val=True, transform=transforms.Compose([
-                #transforms.RandomCrop(32, padding=4),
                 transforms.Resize(32),
-                transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
                                      std=[x / 255.0 for x in [63.0, 62.1, 66.7]])
             ]))
+
 
         id_train_dataset, ood_train_dataset = split_dataset(id_train_dataset, ood_train_dataset)
 
@@ -176,11 +175,13 @@ def split_dataset(id_train_dataset, ood_train_dataset):
     # change to 4 splits
     #nclass_split = int(num_classes/4)
     nclass_split = int(num_classes/5)
+    print("nclass_split:",nclass_split)
     Out_classes = p1[(args.fold - 1) * nclass_split : nclass_split * args.fold]
     In_classes = []
     for item in p1:
         if item not in Out_classes:
             In_classes.append(item)
+    print(Out_classes)
     print (f"# ID classes : {len(In_classes)} # OOD classes: {len(Out_classes)}")
     indata = []
     inlabel = []
@@ -213,7 +214,8 @@ if __name__ == '__main__':
 
     solver = MySolver(args)
     #solver.model.cuda()
-    solver.model = models.DenseNet(int(10 * 4 / 5))
+    #solver.model = models.DenseNet(int(10 * 4 / 5))
+    solver.model = models.DenseNet(int(11 * 4 / 5))     # 8
     ck = torch.load(f"./checkpoints/cifar10_fold_{args.fold}_dense_checkpoint/model_best.pth.tar")  # rmb to refactor for 5 folds
     solver.model.load_state_dict(ck['state_dict'])
 
@@ -221,22 +223,33 @@ if __name__ == '__main__':
     for param in solver.model.parameters():
         param.requires_grad = False
     # First experiment: unfrozen last linear layer
-    solver.model.fc = torch.nn.Linear(342,8)
+    # solver.model.fc = torch.nn.Linear(342,8)
     # Second experiment: unfrozen last layer + last 2 layers of denseblock
-    # for param in solver.model.block3.layer[14].parameters():
+    #for param in solver.model.block3.layer[14].parameters():
     #    param.requires_grad = True
-    # for param in solver.model.block3.layer[15].parameters():
+    #for param in solver.model.block3.layer[15].parameters():
     #    param.requires_grad = True
-    # solver.model.fc = torch.nn.Linear(342, 8)
+    #solver.model.fc = torch.nn.Linear(342, 8)
 
-    # Third exp: freeze last 5 layers
-    #for i in range(10,16):
+    # Third exp: unfreeze last 6 layers
+    for i in range(10,16):
+        for param in solver.model.block3.layer[i].parameters():
+            param.requires_grad = True
+    solver.model.fc = torch.nn.Linear(342, 9)
+
+    # Fourth exp: unfreeze last 11 layers
+    #for i in range(5,16):
     #    for param in solver.model.block3.layer[i].parameters():
     #        param.requires_grad = True
     #solver.model.fc = torch.nn.Linear(342, 8)
-    #
+
+    # Fifth exp: unfreeze last 16 layers
+    #for i in range(16):
+    #    for param in solver.model.block3.layer[i].parameters():
+    #        param.requires_grad = True
+    #solver.model.fc = torch.nn.Linear(342, 8)
+
     solver.model.cuda()
-    #
 
 
     for epoch in range(args.start_epoch, args.epochs):
@@ -255,3 +268,4 @@ if __name__ == '__main__':
 
     print('Best acc:')
     print(solver.best_prec1)
+

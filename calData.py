@@ -12,7 +12,7 @@ from scipy import misc
 import pickle
 
 def cal_in_cls(fold, nclasses, nnName):
-    nsplit = 5
+    nsplit = 5                             # nsplit here is the number of folds
     In_classes = []
     np.random.seed(3)
     p1 = np.random.permutation(nclasses).tolist()
@@ -30,8 +30,10 @@ def testData(net1, criterion, testloaderIn, testloaderOut, in_dataset, out_datas
 
     norm = [63.0/255.0, 62.1/255.0, 66.7/255.0]
     #nclasses = int(in_dataset[5:])
-    nclasses = 10
-    nsplit = int(nclasses*0.8)
+    nclasses = 11
+    nsplit = int(nclasses*0.8)    #nsplit here is number of classes in ID fold, nclasses is total number of classes
+    nsplit = 9      
+    print("nsplit:",nsplit)
 
     N = len(testloaderIn)
     print("length of testloaderin:",N)
@@ -46,7 +48,9 @@ def testData(net1, criterion, testloaderIn, testloaderOut, in_dataset, out_datas
         images, _ = data
 
         inputs = images.cuda().requires_grad_()
+
         outputs = net1(inputs)
+
         # print (inputs, outputs)
         o_output = np.zeros((images.size()[0], nclasses))
         
@@ -89,6 +93,7 @@ def testData(net1, criterion, testloaderIn, testloaderOut, in_dataset, out_datas
         for idx in range(nsplit):
             o_output[:, inclass[idx]] = nnOutputs[:, idx]
         in_pro = np.vstack((in_pro, o_output)) if in_pro.size else o_output
+
         if j % 100 == 99:
             print("{:4}/{:4} images processed, {:.1f} seconds used.".format(j+1, N, time.time()-t0))
             t0 = time.time()
@@ -152,7 +157,7 @@ def testData(net1, criterion, testloaderIn, testloaderOut, in_dataset, out_datas
     # print (out_pro.shape)
     data = {'in_sfx':in_sfx, 'in_pro':in_pro, 'out_sfx':out_sfx, 'out_pro':out_pro}
     pickle.dump(data, open(f"./results/{in_dataset}_{out_dataset}_{fold}.p", "wb"))
-
+    
 
 
 

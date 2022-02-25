@@ -28,4 +28,4 @@ for fold in range(1,6):
 #    subprocess.run(f"python train.py -c checkpoints/pid_nodupes_fold_{fold}_dense_checkpoint --fold {fold} --gpu 0 --in-dataset pid --batch-size 32 ", shell=True)
 # Desenet PID, retraining
 for fold in range(1,6):
-    subprocess.run(f"python retrain.py -c checkpoints/pid_nolifts_800val_retrain_nocrop_fold_{fold}_dense_checkpoint --fold {fold} --gpu 0 --in-dataset pid --batch-size 32 ", shell=True)
+    subprocess.run(f"python retrain.py -c checkpoints/pid_allclass_last6layers_retrain_nocrop_fold_{fold}_dense_checkpoint --fold {fold} --gpu 0 --in-dataset pid --batch-size 32 ", shell=True)

@@ -26,7 +26,7 @@ parser.add_argument('--in-dataset', default="cifar10", type=str,
                     help='neural network name and training set')
 parser.add_argument('--out-dataset', default="Imagenet", type=str,
                     help='out-of-distribution dataset')
-parser.add_argument('--magnitude', default=0.0014, type=float,
+parser.add_argument('--magnitude', default=0.002, type=float,        #0.0014 is paper default
                     help='perturbation magnitude')
 parser.add_argument('--temperature', default=1000, type=int,
                     help='temperature scaling')

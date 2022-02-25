@@ -19,7 +19,7 @@ from PIL import Image
 import os
 import pandas as pd
 
-from gdata import PreliminaryImageDataset
+from gdata import PreliminaryImageDataset, external
 
 start = time.time()
 #loading data sets
@@ -51,6 +51,9 @@ def test(in_dataset, out_dataset, wide, epsilon, temperature):
     elif out_dataset == "celeba":
         testsetout = celeba('./data/celeba', transform=transform)
         testloaderOut = torch.utils.data.DataLoader(testsetout, batch_size=bsize, shuffle=False, num_workers=2)
+    elif out_dataset == 'externalout':
+        testsetout = external('./data/External-OUT',distribution='out',transform=transform)
+        testloaderOut = torch.utils.data.DataLoader(testsetout, batch_size=bsize, shuffle=False, num_workers=2)
     else:
         testsetout = torchvision.datasets.ImageFolder(os.path.expanduser("./data/{}".format(out_dataset)), transform=transform)
         testloaderOut = torch.utils.data.DataLoader(testsetout, batch_size=bsize, shuffle=False, num_workers=2)
@@ -66,16 +69,16 @@ def test(in_dataset, out_dataset, wide, epsilon, temperature):
     elif in_dataset == "pid":
         testset = PreliminaryImageDataset(transform=transform)
         testloaderIn = torch.utils.data.DataLoader(testset, batch_size=bsize, shuffle=False, num_workers=2)
+    elif in_dataset == 'externalin':
+        testset = external('./data/External-IN',distribution='in',transform=transform)
+        testloaderIn = torch.utils.data.DataLoader(testset, batch_size=bsize, shuffle=False, num_workers=2)
 
 
 
-    #for fold in range(1,6):
-    #    print (f"Processing fold {fold}")
-    #for 4 splits
     for fold in range(1,6):
         print (f"Processing fold {fold}")
         #nclasses = int(in_dataset[5:])
-        nclasses = 10
+        nclasses = 11
         if wide: 
             net = models.WideResNet(int(nclasses*4/5))
             ck = torch.load(f"./checkpoints/{in_dataset}_fold_{fold}_wide_checkpoint/model_best.pth.tar")
@@ -84,8 +87,10 @@ def test(in_dataset, out_dataset, wide, epsilon, temperature):
             #ck = torch.load(f"./checkpoints/{in_dataset}_fold_{fold}_dense_checkpoint/model_best.pth.tar")
 
             print("Loading densenet")
-            net = models.DenseNet(int(nclasses*4/5))
-            ck = torch.load(f"./checkpoints/pid_nolifts_800val_retrain_nocrop_fold_{fold}_dense_checkpoint/retrained_model_best.pth.tar")
+            #net = models.DenseNet(int(nclasses*4/5))
+            net = models.DenseNet(9)
+            net.fc = torch.nn.Linear(342,9)
+            ck = torch.load(f"./checkpoints/pid_allclass_last6layers_retrain_nocrop_fold_{fold}_dense_checkpoint/retrained_model_best.pth.tar")
             
         net.load_state_dict(ck['state_dict'])
 
@@ -97,7 +102,8 @@ def test(in_dataset, out_dataset, wide, epsilon, temperature):
     m.test(in_dataset, out_dataset, plot=True)
 
 #import matplotlib.pyplot as plt
-#a = PIDtrain('./Preliminary_Image_Dataset','./data/pidood')
+#a = external('./data/External-OUT',distribution='out',transform=transform)
+#print(len(a))
 #print(len(a))
 #print(type(a[0][0]))
 #plt.imshow(a[15][0].permute(1,2,0))
