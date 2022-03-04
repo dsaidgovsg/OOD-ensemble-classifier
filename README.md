@@ -1,6 +1,6 @@
 # Notice
 This repository contains the code used in my DSA4199 final report. Plotting of visuals are done using miscplots.ipynb
-Model retraining are done using eloc_solver_retrain.py and retrain.py instead of eloc_solver_train.py and train.py respectively.
+Model retraining are done using eloc_solver_retrain.py and retrain.py instead of eloc_solver.py and train.py respectively.
 
 Official code implemantations belong to the original authors.
 
