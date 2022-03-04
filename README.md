@@ -1,3 +1,9 @@
+# Notice
+This repository contains the code used in my DSA4199 final report. Plotting of visuals are done using miscplots.ipynb
+Model retraining are done using eloc_solver_retrain.py and retrain.py instead of eloc_solver_train.py and train.py respectively.
+
+Official code implemantations belong to the original authors.
+
 # Ensemble of Self Supervised Leave-out Classifiers
 This is an unofficial pytorch implementation of [Out-of-Distribution Detection Using an Ensemble of Self Supervised Leave-out Classifiers](http://openaccess.thecvf.com/content_ECCV_2018/papers/Apoorv_Vyas_Out-of-Distribution_Detection_Using_ECCV_2018_paper.pdf). 
 
