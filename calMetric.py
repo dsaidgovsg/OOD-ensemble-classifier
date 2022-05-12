@@ -197,5 +197,5 @@ def detection(X1, Y1):
 
     return errorBase
 
-if __name__ == '__main__':
-    test('cifar10','Imagenet',plot=True)
+#if __name__ == '__main__':
+#    test('cifar10','Imagenet',plot=True)

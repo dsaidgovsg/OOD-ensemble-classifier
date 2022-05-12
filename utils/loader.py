@@ -201,6 +201,8 @@ class PIDtrain(Dataset):
         self.test_labels = self.samples[p[:800]][:,1]
         self.train_data = self.samples[p[800:]][:,0]
         self.train_labels = self.samples[p[800:]][:,1]
+
+
         if train == False:
             self.train_data = []
             self.train_labels = []
@@ -209,18 +211,19 @@ class PIDtrain(Dataset):
             #ID Data
             np.random.seed(3)                                           #1000 ID from PID, 400 OOD from iSUN
             p1 = np.random.permutation(len(self.test_data))             #400 ID from PID, 400 OOD from iSUN for val
-            self.test_data = self.test_data[p1[:400]]                   #400 ID from PID, 100 OOD from PIDood
-            self.test_labels = [self.test_labels[i] for i in p1.tolist()[:400]]
+            self.test_data = self.test_data[p1[:800]]                   #400 ID from PID, 100 OOD from PIDood
+            self.test_labels = [self.test_labels[i] for i in p1.tolist()[:800]]   # 800 ID from PID, 1000 OOD from iSUN for 11 class training with external test
             #OOD Data
             np.random.seed(3)
             p2 = np.random.permutation(len(self.outpath))
-            self.outpath = [self.outpath[i] for i in p2.tolist()[:400]]
+            self.outpath = [self.outpath[i] for i in p2.tolist()[:1000]]
         else:
+            pass                # only for 11 class training with external test
             #ID Data
-            np.random.seed(3)
-            p1 = np.random.permutation(len(self.test_data))
-            self.test_data = self.test_data[p1[400:]]
-            self.test_labels = [self.test_labels[i] for i in p1.tolist()[400:]]
+            #np.random.seed(3)
+            #p1 = np.random.permutation(len(self.test_data))
+            #self.test_data = self.test_data[p1[400:]]
+            #self.test_labels = [self.test_labels[i] for i in p1.tolist()[400:]]
             #OOD Data                                                  # iSUN as OOD has a lot of samples 
             #np.random.seed(3)
             #p2 = np.random.permutation(len(self.outpath))
@@ -259,6 +262,7 @@ class PIDtrain(Dataset):
             return len(self.train_data)
         else:
             return len(self.test_data) + len(self.outpath)
+
 
 
 class PIDonly(Dataset):
@@ -336,3 +340,4 @@ class celeba(Dataset):
     def __len__(self):
         return len(self.test_data)
 
+#####################
